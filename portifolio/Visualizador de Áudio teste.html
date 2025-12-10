@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Áudio Circular</title>
+    <style>
+        /* --- CSS (Estilo Visual) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Fundo escuro para destacar as cores */
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden; /* Evita barras de rolagem durante a animação */
+        }
+
+        #instructions {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none; /* O texto não atrapalha cliques */
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        p { color: #aaa; font-size: 0.9rem; }
+
+        /* O elemento Canvas é onde o desenho acontece */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Um filtro sutil para deixar o brilho mais bonito */
+            filter: blur(1px) contrast(1.2);
+        }
+
+        /* Botão de início */
+        #startButton {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.5);
+            transition: transform 0.2s, opacity 0.5s;
+        }
+
+        #startButton:hover { transform: scale(1.05); }
+        
+        /* Classe para esconder o botão suavemente após o clique */
+        .fade-out { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="instructions">
+        <h1>Visualizador Espectral</h1>
+        <p>Fale ou toque música para ver o som.</p>
+    </div>
+
+    <button id="startButton">Clique para Iniciar o Show</button>
+    
+    <canvas id="myCanvas"></canvas>
+
+    <script>
+        /* --- JavaScript (Lógica Complexa) --- */
+        
+        const button = document.getElementById('startButton');
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d'); // O contexto de desenho 2D
+
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let source;
+
+        // Configura o tamanho do canvas para a tela inteira
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Atualiza o tamanho se o usuário redimensionar a janela
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        button.addEventListener('click', async () => {
+            // Esconde o botão
+            button.classList.add('fade-out');
+            document.getElementById('instructions').classList.add('fade-out');
+
+            // 1. Configuração da Web Audio API
+            try {
+                // Pede acesso ao microfone
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Cria o contexto de áudio (o "cérebro" do som)
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Cria o analisador (ele extrai os dados de frequência)
+                analyser = audioContext.createAnalyser();
+                // fftSize define a "resolução" da análise. Quanto maior, mais barras.
+                // Deve ser potência de 2 (ex: 512, 1024, 2048)
+                analyser.fftSize = 256; 
+
+                // Conecta o microfone ao analisador
+                source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+
+                // Descobre quantos pontos de dados teremos (metade do fftSize)
+                const bufferLength = analyser.frequencyBinCount;
+                // Cria um array para guardar os dados de volume de cada frequência (0 a 255)
+                dataArray = new Uint8Array(bufferLength);
+
+                // Inicia o loop de animação
+                animar();
+
+            } catch (err) {
+                alert("Erro ao acessar o microfone. Por favor, permita o acesso para que funcione.");
+                console.error(err);
+                button.classList.remove('fade-out'); // Traz o botão de volta se der erro
+            }
+        });
+
+
+        // A função que desenha na tela repetidamente (loop)
+        function animar() {
+            // Limpa o canvas inteiro para desenhar o próximo quadro
+            // O fundo preto levemente transparente cria um efeito de rastro (motion blur)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Pega os dados de frequência atuais e coloca no dataArray
+            analyser.getByteFrequencyData(dataArray);
+
+            // Configurações do desenho circular
+            const centroX = canvas.width / 2;
+            const centroY = canvas.height / 2;
+            // O raio base do círculo central
+            const raioBase = 100;
+            // Quantas barras vamos desenhar (baseado no tamanho do buffer)
+            const barras = dataArray.length;
+            // O ângulo entre cada barra para formar um círculo completo (2 * PI)
+            const passoAngulo = (Math.PI * 2) / barras;
+
+            // Loop para desenhar cada barra
+            for (let i = 0; i < barras; i++) {
+                // O valor da frequência (volume) naquele ponto (0 a 255)
+                const valor = dataArray[i];
+                // Calcula a altura da barra baseada no volume (limitada para não sair da tela)
+                const alturaBarra = (valor / 255) * 250; 
+
+                // Calcula a cor baseada na posição (i) e no volume (valor)
+                // Usamos HSL para cores vibrantes tipo arco-íris
+                const hue = i * 2 + (valor / 2);
+                const cor = `hsl(${hue}, 100%, 50%)`;
+                
+                // --- Trigonometria para posicionar em círculo ---
+                const anguloAtual = i * passoAngulo;
+                
+                // Salva o estado atual do contexto de desenho
+                ctx.save();
+                // Move o ponto de origem (0,0) para o centro da tela
+                ctx.translate(centroX, centroY);
+                // Gira o canvas para o ângulo atual
+                ctx.rotate(anguloAtual);
+
+                // Desenha a barra
+                ctx.beginPath();
+                // Começa a desenhar um pouco afastado do centro (raioBase)
+                ctx.moveTo(0, raioBase); 
+                // Desenha uma linha para fora
+                ctx.lineTo(0, raioBase + alturaBarra); 
+                ctx.strokeStyle = cor;
+                ctx.lineWidth = 4; // Largura da barra
+                // Define as pontas da linha como arredondadas
+                ctx.lineCap = 'round'; 
+                ctx.stroke();
+                // Adiciona um brilho extra
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = cor;
+                ctx.stroke();
+                
+                // Restaura o contexto para a posição original para a próxima iteração
+                ctx.restore();
+            }
+
+            // Cria um círculo central pulsante
+            // Calcula a média do volume geral para definir o tamanho do pulso
+            let volumeMedio = dataArray.reduce((a, b) => a + b) / barras;
+            
+            ctx.beginPath();
+            ctx.arc(centroX, centroY, raioBase - 10 + (volumeMedio / 5), 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Chama a função novamente no próximo quadro de animação (aprox. 60fps)
+            requestAnimationFrame(animar);
+        }
+    </script>
+</body>
+</html>
