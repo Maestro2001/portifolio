@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Completa</title>
+    <style>
+        /* --- CSS (Estilos) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c3e50; /* Cor de fundo da página */
+        }
+
+        .calculator {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 20px rgba(0,0,0,0.3);
+            width: 320px;
+        }
+
+        #display {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #2c3e50;
+            text-align: right;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #bdc3c7;
+            pointer-events: none; /* Impede o usuário de digitar letras */
+        }
+
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #fff;
+            color: #333;
+            box-shadow: 0 4px #999;
+            transition: all 0.1s;
+        }
+
+        button:active {
+            box-shadow: 0 2px #666;
+            transform: translateY(2px);
+        }
+
+        /* Botões de Operação (Laranja) */
+        .operator-btn {
+            background-color: #f39c12;
+            color: white;
+            box-shadow: 0 4px #c27c0e;
+        }
+        .operator-btn:active {
+            box-shadow: 0 2px #c27c0e;
+        }
+
+        /* Botão Igual (=) - Verde e Alto */
+        .equal-btn {
+            grid-row: span 2;
+            height: 100%;
+            background-color: #27ae60;
+            color: white;
+            box-shadow: 0 4px #1e8449;
+        }
+        .equal-btn:active {
+            box-shadow: 0 2px #1e8449;
+        }
+
+        /* Botão Zero - Largo */
+        .zero-btn {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <input type="text" id="display" readonly>
+        
+        <div class="keys">
+            <button onclick="clearDisplay()" class="operator-btn">C</button>
+            <button onclick="appendToDisplay('/')" class="operator-btn">/</button>
+            <button onclick="appendToDisplay('*')" class="operator-btn">x</button>
+            <button onclick="deleteLast()" class="operator-btn">DEL</button>
+            
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('-')" class="operator-btn">-</button>
+            
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('+')" class="operator-btn">+</button>
+            
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="calculate()" class="equal-btn">=</button>
+            
+            <button onclick="appendToDisplay('0')" class="zero-btn">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById("display");
+
+        // Adiciona números/operadores ao visor
+        function appendToDisplay(input) {
+            display.value += input;
+        }
+
+        // Limpa tudo (C)
+        function clearDisplay() {
+            display.value = "";
+        }
+
+        // Apaga o último caractere (DEL)
+        function deleteLast() {
+            display.value = display.value.toString().slice(0, -1);
+        }
+
+        // Faz o cálculo (=)
+        function calculate() {
+            try {
+                // eval executa a conta matemática escrita no texto
+                display.value = eval(display.value);
+            } catch (error) {
+                display.value = "Erro";
+                setTimeout(() => display.value = "", 1000); // Limpa erro após 1s
+            }
+        }
+    </script>
+</body>
+</html>

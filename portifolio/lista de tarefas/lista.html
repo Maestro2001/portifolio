@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Lista de Tarefas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 { text-align: center; color: #333; }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        input:focus { border-color: #6c5ce7; }
+        
+        button#add-btn {
+            padding: 10px 20px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button#add-btn:hover { background-color: #5b4bc4; }
+
+        ul { list-style: none; padding: 0; }
+        
+        li {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        li:hover { background-color: #fafafa; }
+        
+        /* Classe usada quando a tarefa é clicada (riscada) */
+        .done {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .delete-btn {
+            background-color: #ff7675;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.8rem;
+        }
+        .delete-btn:hover { background-color: #d63031; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Minhas Tarefas 📝</h2>
+    <div class="input-group">
+        <input type="text" id="inputTarefa" placeholder="O que você precisa fazer?">
+        <button id="add-btn" onclick="adicionarTarefa()">Adicionar</button>
+    </div>
+    <ul id="listaTarefas">
+        </ul>
+</div>
+
+<script>
+    const input = document.getElementById("inputTarefa");
+    const lista = document.getElementById("listaTarefas");
+
+    // Adiciona tarefa ao apertar Enter também
+    input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            adicionarTarefa();
+        }
+    });
+
+    function adicionarTarefa() {
+        const textoTarefa = input.value;
+
+        if (textoTarefa === '') {
+            alert("Escreva alguma coisa!");
+            return;
+        }
+
+        // 1. Cria o elemento LI (item da lista)
+        const li = document.createElement("li");
+        
+        // 2. Cria o texto da tarefa
+        const span = document.createElement("span");
+        span.innerText = textoTarefa;
+        // Ao clicar no texto, risca a tarefa
+        span.onclick = function() {
+            span.classList.toggle("done");
+        };
+
+        // 3. Cria o botão de excluir
+        const btnExcluir = document.createElement("button");
+        btnExcluir.innerText = "X";
+        btnExcluir.className = "delete-btn";
+        btnExcluir.onclick = function() {
+            lista.removeChild(li);
+        };
+
+        // 4. Junta tudo e coloca na lista
+        li.appendChild(span);
+        li.appendChild(btnExcluir);
+        lista.appendChild(li);
+
+        // Limpa o input
+        input.value = "";
+    }
+</script>
+
+</body>
+</html>

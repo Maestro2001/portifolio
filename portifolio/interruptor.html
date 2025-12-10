@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOD disjuntor</title>
+    <style>
+        /* --- Configuração Geral --- */
+        body {
+            margin: 0;
+            padding: 0;
+            /* A transição suave de 1 segundo para a cor de fundo */
+            transition: background-color 1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #87CEEB; /* Cor inicial: Dia (Azul Céu) */
+            overflow: hidden;
+        }
+
+        /* --- O Checkbox Invisível (O Cérebro) --- */
+        #trocar-tema {
+            display: none; /* Escondemos a caixinha feia padrão */
+        }
+
+        /* --- O Botão (O Interruptor) --- */
+        .interruptor {
+            position: relative;
+            width: 200px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 100px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 4px solid white;
+        }
+
+        /* --- O Círculo (Sol/Lua) --- */
+        .circulo {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 70px;
+            height: 70px;
+            background: #FDB813; /* Cor do Sol */
+            border-radius: 50%;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Movimento com "elástico" */
+            box-shadow: 0 0 20px #FDB813;
+        }
+
+        /* --- Nuvens (Decorativo) --- */
+        .nuvem {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            transition: transform 1s, opacity 1s;
+        }
+
+        /* Desenhando as nuvens */
+        .nuvem-1 { width: 100px; height: 40px; top: 20%; left: 10%; }
+        .nuvem-2 { width: 120px; height: 50px; top: 10%; right: 20%; }
+        
+        /* Estrelas (Invisíveis durante o dia) */
+        .estrela {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            width: 4px;
+            height: 4px;
+            opacity: 0; /* Começam invisíveis */
+            transition: opacity 1s;
+            box-shadow: 0 0 10px white;
+        }
+
+        /* Posicionando algumas estrelas */
+        .e1 { top: 10%; left: 20%; }
+        .e2 { top: 30%; left: 80%; }
+        .e3 { top: 60%; left: 10%; }
+        .e4 { top: 80%; left: 70%; }
+        .e5 { top: 15%; left: 50%; }
+
+        /* --- A MÁGICA DO CSS --- */
+        
+        /* 1. Quando marcado, mude o fundo do BODY */
+        /* Usamos o seletor :has para afetar o pai (suportado em navegadores modernos) */
+        body:has(#trocar-tema:checked) {
+            background-color: #2c3e50; /* Cor: Noite (Azul Escuro) */
+        }
+
+        /* 2. Mover o Círculo para a direita e virar Lua */
+        #trocar-tema:checked + .interruptor .circulo {
+            transform: translateX(120px); /* Move para o lado */
+            background: #f5f6fa; /* Cor da Lua */
+            box-shadow: 0 0 20px #f5f6fa;
+        }
+
+        /* 3. Mudar o fundo do interruptor */
+        #trocar-tema:checked + .interruptor {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* 4. Esconder Nuvens / Mostrar Estrelas */
+        body:has(#trocar-tema:checked) .nuvem {
+            transform: translateY(100px); /* Nuvens caem */
+            opacity: 0;
+        }
+
+        body:has(#trocar-tema:checked) .estrela {
+            opacity: 1; /* Estrelas aparecem */
+            animation: piscar 2s infinite alternate;
+        }
+
+        /* Animação extra das estrelas */
+        @keyframes piscar {
+            from { opacity: 0.3; }
+            to { opacity: 1; }
+        }
+
+        /* Texto explicativo */
+        .texto {
+            position: absolute;
+            bottom: 20px;
+            color: white;
+            font-family: sans-serif;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="trocar-tema">
+
+    <label for="trocar-tema" class="interruptor">
+        <div class="circulo"></div>
+    </label>
+
+    <div class="nuvem nuvem-1"></div>
+    <div class="nuvem nuvem-2"></div>
+    
+    <div class="estrela e1"></div>
+    <div class="estrela e2"></div>
+    <div class="estrela e3"></div>
+    <div class="estrela e4"></div>
+    <div class="estrela e5"></div>
+
+    <div class="texto">Clique no botão para alternar!</div>
+
+</body>
+</html>
